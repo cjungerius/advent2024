@@ -1,4 +1,4 @@
-# Day 2 solution: 1.148 ms (24426 allocations: 1.96 MiB)
+# Day 2 solution: 972.800 μs (16967 allocations: 1.41 MiB)
 input = readlines("input/02_input.txt")
 
 function day_two(input)
@@ -16,7 +16,7 @@ end
 function report_checker(report, subset=false)
     partone, parttwo = (false, false)
     diffs = diff(report)
-    partone = (allequal(sign.(diffs)) && all(abs.(diffs) .< 4))
+    partone = all(x -> -3 <= x <= -1, diffs) || all(x -> 1 <= x <= 3, diffs)
     
     if !partone && !subset
        for i in eachindex(report)
