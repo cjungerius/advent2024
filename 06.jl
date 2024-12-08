@@ -1,77 +1,85 @@
-# Day 6 solution: 2.027 s (15178530 allocations: 2.64 GiB)
+# Day 6 solution: 128.135 ms (56493 allocations: 48.12 MiB)
 
 input = readlines("input/06_input.txt")
 
 function day_six(input)
 
-    obstacles = Set{Tuple{Int,Int}}()
+    max_y = length(input)
+    max_x = length(input[1])
+    obstacles = falses(max_y, max_x)
     directions = Dict(1 => (-1,0), 2 => (0,1), 3 => (1,0), 4 => (0,-1)) # up, right, down, left
-    current_direction = 0
+    starting_direction = 0
     starting_y, starting_x = (0, 0)
 
     for y in eachindex(input)
         x_coords = findall('#', input[y])
-        push!(obstacles,[(y,x) for x in x_coords]...)
+        if !isempty(x_coords)
+            for x in x_coords
+                obstacles[y,x] = true
+            end
+        end
         guard_loc = findfirst(r"\^|\|>|\v|\<", input[y])
         if !isnothing(guard_loc)
             starting_y, starting_x = (y, guard_loc[1])
             guard = input[starting_y][starting_x]
             if guard == '^'
-                current_direction = 1
+                starting_direction = 1
             elseif guard == '>'
-                current_direction = 2
+                starting_direction = 2
             elseif guard == 'v'
-                current_direction = 3
+                starting_direction = 3
             elseif guard == '<'
-                current_direction = 4
+                starting_direction = 4
             end
         end
     end
 
-    max_y = length(input)
-    max_x = length(input[1])
+
 
     function guard_routine(y,x,dir)
-        visited = Dict{Tuple{Int,Int},Vector{Bool}}((y,x) => [false, false, false, false])
-        visited[(y,x)][dir] = true
-    
-        while 0 < y < max_y && 0 < x < max_x   
-            
-            dy, dx = directions[dir]
+        env = falses(max_y, max_x)
+        env[y,x] = true
+        collisions = Set{Tuple{Int,Int,Int}}()
+        dy, dx = directions[dir]
 
-            if (y + dy, x + dx) in obstacles
-                dir = mod1(dir + 1, 4)
-            else
-                y += dy
-                x += dx
-                if !haskey(visited, (y,x))
-                    visited[(y,x)] = [false, false, false, false]
-                    visited[(y,x)][dir] = true
-                elseif visited[(y,x)][dir]
-                    #println("Loop detected at $y, $x")
+    
+        while 0 < y + dy <= max_y && 0 < x + dx <= max_x
+
+            #collision check: is there a wall in front of us?
+            if obstacles[y + dy, x + dx]
+                #if we've already been here, we're looping
+                if (y, x, dir) in collisions
                     return nothing
                 else
-                    visited[(y,x)][dir] = true
+                #otherwise, we've hit a wall, so we turn right. remember the collision, and keep going
+                push!(collisions, (y, x, dir))
+                dir = mod1(dir + 1, 4)
+                dy, dx = directions[dir]
                 end
+            #if there's no wall, we move forward 
+            else
+            env[y + dy,x + dx] = true                
+            y += dy
+            x += dx
             end
         end    
-        visited
+        env
     end
 
-    original_route = guard_routine(starting_y,starting_x,current_direction)
-    part_one = length(keys(original_route))
+    part_one = guard_routine(starting_y, starting_x, starting_direction)
     part_two = 0
-
-    for key in keys(original_route)
-        if !(key[1] == starting_y && key[2] == starting_x)
-            # add obstacle in path and check if it's a loop
-            push!(obstacles, key)
-            part_two += isnothing(guard_routine(starting_y,starting_x,current_direction))
-            pop!(obstacles, key)
+    for i in 1:max_y, j in 1:max_x
+        if i == starting_y && j == starting_x
+            continue
+        end
+        if part_one[i, j] && !obstacles[i, j]
+            obstacles[i, j] = true
+            part_two += isnothing(guard_routine(starting_y, starting_x, starting_direction))
+            obstacles[i, j] = false
         end
     end
 
-    (part_one, part_two)
+    sum(part_one), part_two
 end
 
 part_one, part_two = day_six(input)
