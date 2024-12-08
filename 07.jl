@@ -1,19 +1,30 @@
-using Memoization
+# Day 7 solution: 84.221 ms (9943 allocations: 1.13 MiB)
+
 input = readlines("input/07_input.txt")
 
-@memoize function is_valid(target, vals)
-    if length(vals) == 2
-        return target == vals[1] * vals[2] || target == vals[1] + vals[2]
+function is_valid(target, total, vals)
+    
+    if total > target
+        return false
+    end
+
+    if length(vals) == 1
+        return target == total * vals[1] || target == total + vals[1]
     else
-        return is_valid(target,[vals[1]*vals[2],vals[3:end]...]) || is_valid(target,[vals[1]+vals[2],vals[3:end]...])
+        return is_valid(target, total+vals[1], @view vals[2:end]) || is_valid(target, total * vals[1], @view vals[2:end])
     end
 end
 
-@memoize function is_valid_p2(target, vals)
-    if length(vals) == 2
-        return target == vals[1] * vals[2] || target == vals[1] + vals[2] || target == vals[1]*10^ceil(log(10,vals[2]+1)) + vals[2]
+function is_valid_p2(target, total, vals)
+    
+    if total > target
+        return false
+    end
+
+    if length(vals) == 1
+        return target == total * vals[1] || target == total + vals[1] || target == total*10^ceil(log(10,vals[1]+1)) + vals[1]
     else
-        return is_valid_p2(target,[vals[1]*vals[2],vals[3:end]...]) || is_valid_p2(target,[vals[1]+vals[2],vals[3:end]...]) || is_valid_p2(target,[vals[1]*10^ceil(log(10,vals[2]+1)) + vals[2],vals[3:end]...])
+        return is_valid_p2(target, total * vals[1], @view vals[2:end]) || is_valid_p2(target, total + vals[1], @view vals[2:end]) || is_valid_p2(target, total*10^ceil(log(10,vals[1]+1)) + vals[1], @view vals[2:end])
     end
 end
 
@@ -24,12 +35,16 @@ function day_seven(input)
         target, vals = split(line,": ")
         target = parse(Int, target)
         vals = parse.(Int,split(vals," "))
-        if is_valid(target,vals)
+        if is_valid(target, vals[1], @view vals[2:end])
             part_one += target
             part_two += target
-        elseif is_valid_p2(target,vals)
+        elseif is_valid_p2(target, vals[1], @view vals[2:end])
             part_two += target
         end
     end 
     part_one, part_two
 end
+
+part_one, part_two = day_seven(input)
+println("Part One: ", part_one)
+println("Part Two: ", part_two)
