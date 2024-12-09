@@ -59,3 +59,7 @@ function day_eight(input)
 
     length(part_one), length(part_two)
 end
+
+part_one, part_two = day_eight(input)
+println("Part One: ", part_one)
+println("Part Two: ", part_two)
