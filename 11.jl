@@ -1,4 +1,4 @@
-# Day 11 solution
+# Day 11 solution: 3.663 μs (36 allocations: 1.42 KiB)
 
 using Memoization
 
@@ -37,3 +37,7 @@ function day_eleven(input)
     end 
     part_one, part_two
 end
+
+part_one, part_two = day_eleven(input)
+println("Part One: ", part_one)
+println("Part Two: ", part_two)
