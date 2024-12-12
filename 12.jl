@@ -1,4 +1,4 @@
-# Day 12 solution: 7.336 ms (28371 allocations: 6.23 MiB)
+# Day 12 solution: 6.747 ms (26487 allocations: 1.18 MiB)
 using DataStructures
 
 input = readlines("input/12_input.txt")
@@ -11,6 +11,11 @@ function day_twelve(input)
     diags = CartesianIndex.([(1,1),(-1,1),(-1,-1),(1,-1)])
     corner_checker = [false, false, false, false]
 
+    to_visit = Queue{CartesianIndex}()
+    area = 1
+    circumference = 0
+    corners = 0
+
     part_one = 0
     part_two = 0
     
@@ -20,7 +25,6 @@ function day_twelve(input)
             circumference = 0
             corners = 0
             field_type = field[i]
-            to_visit = Queue{CartesianIndex}()
             enqueue!(to_visit,i)
             visited[i] = true
 
@@ -68,3 +72,7 @@ function day_twelve(input)
     end
     (part_one, part_two)
 end
+
+part_one, part_two = day_twelve(input)
+println("Part One: ", part_one)
+println("Part Two: ", part_two)
