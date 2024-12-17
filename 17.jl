@@ -1,4 +1,4 @@
-# Day 17 solution: 1.202 ms (13242 allocations: 801.05 KiB)
+# Day 17 solution: 1.261 ms (12248 allocations: 770.23 KiB)
 input = readlines("input/17_input.txt")
 
 function run_program(A, B, C, program)
@@ -74,17 +74,28 @@ function day_seventeen(input)
     #inspection reveals that the program has some mapping for each base 8 digit in the input: 
     # working from biggest to smallest we can find the input that reconstructs the program 'key'
 
-    input = repeat(["0"],16)
-    for i in eachindex(input)
-        target = reverse(program)[i]
-        for x in (i == 1 ? (1:7) : (0:7)) # the 8^16 digit has to be > 0 for the program to have an output of the correct length
-            input[i] = string(x)
-            A = parse(Int,prod(input),base=8)
-            output = run_program(A,B,C,program)
-            reverse(output)[i] == target && break
+    candidate = digits(8^15,base=8)
+    current_digit = lastindex(candidate)
+
+    while true
+        A = sum(candidate[k]*8^(k-1) for k in eachindex(candidate))
+        attempt = run_program(A, B, C, program)
+        attempt == program && break
+
+        if attempt[current_digit:end] == program[current_digit:end]
+            current_digit -= 1   
+        else
+            if candidate[current_digit] < 7
+                candidate[current_digit] += 1
+            else
+                candidate[current_digit] = 0
+                current_digit += 1
+                candidate[current_digit] += 1
+            end            
         end
     end
-    part_two = parse(Int,prod(input),base=8)
+
+    part_two = sum(candidate[k]*8^(k-1) for k in eachindex(candidate))
     part_one, part_two
 end
 
