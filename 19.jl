@@ -1,4 +1,4 @@
-# Day 19 solution: 481.241 ms (8815674 allocations: 411.64 MiB)
+# Day 19 solution: 275.613 ms (7465448 allocations: 350.67 MiB)
 input = readlines("input/19_input.txt")
 
 function day_nineteen(input)
@@ -17,7 +17,7 @@ function day_nineteen(input)
 
             for t in used_towels
                 next_attempt = attempt * t
-                if length(next_attempt) <= length(design) && next_attempt == design[1:length(next_attempt)]
+                if startswith(design,next_attempt)
                     n += check_design(next_attempt, design)
                 end
             end
