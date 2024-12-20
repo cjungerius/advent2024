@@ -1,4 +1,4 @@
-# Day eighteen solution: 12.145 ms (359049 allocations: 13.18 MiB)
+# Day 18 solution: 12.145 ms (359049 allocations: 13.18 MiB)
 using DataStructures
 
 input =readlines("input/18_input.txt")
