@@ -1,4 +1,4 @@
-# Day 21 solution
+# Day 21 solution: 4.739 ms (67484 allocations: 2.64 MiB)
 
 input = readlines("input/21_input.txt")
 using Memoization
@@ -37,34 +37,44 @@ function day_twentyone(input)
         return [hori*vert, vert*hori]
     end
 
-    new_codes = []
+    function build_seq(keys, depth, index=1, prevkey='A', currpath="", results = [])
 
-    function build_seq(keys, depth, index=1, prevkey='A', currpath="")
         if index == lastindex(keys)+1
-            push!(new_codes,currpath)
+            push!(results, currpath)
             return currpath
         end
         for path in get_paths(prevkey, keys[index], depth)
-            build_seq(keys, depth, index+1, keys[index], currpath * path * 'A')
+            build_seq(keys, depth, index+1, keys[index], currpath * path * 'A', results)
         end
+        return results
     end
+
+    @memoize function shortest_seq(keys, depth, target_depth)
+                if depth == target_depth
+                    return length(keys)
+                end
+
+                total = 0
+                subkeys = split(keys,'A')[1:end-1] .* 'A'
+                for subkey in subkeys
+                    sequences = build_seq(subkey, depth)
+                    costs = [shortest_seq(seq,depth+1, target_depth) for seq in sequences]
+                    total += minimum(costs)
+                end
+
+                return total
+            end
 
     part_one = 0
+    part_two = 0
     
     for line in input
-        codes = [line]
-        mult = parse(Int,codes[1][1:end-1])
-        for i in 0:2
-            new_codes = []
-            for code in codes
-            build_seq(code,i)
-            codes = new_codes
-            end
-        end
-        part_one += minimum(length,codes) * mult
+        mult = parse(Int,line[1:end-1])      
+        part_one += shortest_seq(line,0,3) * mult
+        part_two += shortest_seq(line,0,26) * mult
     end
 
-    part_one
+    part_one, part_two
 end
 
 a = day_twentyone(input)
